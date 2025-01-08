@@ -1,13 +1,12 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/SocketProvider";
 
-const Lobby = () => {
-  const [startTime, setStartTime] = useState("17:20"); // Time in IST
-  const [appointmentDate, setAppointmentDate] = useState("2025-01-07"); // Date in IST
+const Lobby = ({setIsDoctor, isDoctor}) => {
+  const [startTime, setStartTime] = useState("14:36"); // Time in IST
+  const [appointmentDate, setAppointmentDate] = useState("2025-01-08"); // Date in IST
   const [email, setEmail] = useState("");
   const [room, setRoom] = useState("");
-  const [role, setRole] = useState("");
 
   const socket = useSocket();
   const navigate = useNavigate();
@@ -15,11 +14,23 @@ const Lobby = () => {
   const handleSubmitForm = useCallback(
     (e) => {
       e.preventDefault();
-      console.log("data going is", { email, room, role });
-      socket.emit("room:join", { email, room, role });
+      console.log("data going is", { email, room });
+      socket.emit("room:join", { email, room });
     },
-    [email, room, socket, role]
+    [email, room, socket]
   );
+
+  const checkMedia = () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert(
+        "Your browser does not support accessing media devices. Please use a modern browser like Chrome, Edge, or Firefox and ensure the app is served over HTTPS."
+      );
+      console.error("MediaDevices API is not available.");
+      return;
+    }
+  };
+
+  checkMedia();
 
   const handleJoinRoom = useCallback(
     (data) => {
@@ -93,8 +104,8 @@ const Lobby = () => {
         <input
           type="text"
           id="role"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
+          value={isDoctor}
+          onChange={(e) => setIsDoctor(e.target.value)}
           className="border border-solid p-2"
         />
         <br />

@@ -14,15 +14,14 @@ io.on("connection", (socket) => {
 
   // Handle user joining a room
   socket.on("room:join", (data) => {
-    let { email, room, role } = data;
-    console.log(`data is: ${email}, ${room}, ${role}`);
+    let { email, room } = data;
+    console.log(`data is: ${email}, ${room}`);
 
     // Map email to socket id and vice versa
     emailToSocketIdMap.set(email, socket.id);
     socketidToEmailMap.set(socket.id, email);
 
     room = room.toString().trim();
-    role = role.toString().trim().toLowerCase();
 
     // Initialize room if it doesn't exist
     if (!rooms[room]) {
@@ -40,17 +39,14 @@ io.on("connection", (socket) => {
 
     // Add user to the room's email list if not already present
     if (!rooms[room].some((user) => user.email === email)) {
-      rooms[room].push({ email, id: socket.id, role });
+      rooms[room].push({ email, id: socket.id });
     }
 
     // Join the Socket.IO room
     socket.join(room);
 
     // handle navigate to room.jsx below
-    io.to(socket.id).emit("room:join", { email, room, role });
-
-    // Check if the user is the first in the room
-    const isDoctor = role === "doctor" ? "doctor" : "patient";
+    io.to(socket.id).emit("room:join", { email, room });
 
     // Get socket ID of user already in the room (excluding the current user)
     const userInRoom = rooms[room].filter((item) => item.email !== email);
@@ -66,19 +62,17 @@ io.on("connection", (socket) => {
 
     // Notify the joining user about others in the room
     console.log("Emitting room:joined with data:", {
-      isDoctor,
       user: existingUserSocketId,
     });
 
     io.to(socket.id).emit("room:joined", {
-      isDoctor: isDoctor,
       user: existingUserSocketId,
     });
 
     console.log(
       "room:joined event emitted to:",
       socket.id,
-      "existingUserSocketId",
+      "existingUserSocketId :",
       existingUserSocketId
     );
 

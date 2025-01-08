@@ -10,12 +10,13 @@ import not__video__controls from "../assets/not__video__control.svg";
 import open__chat from "../assets/open__chat.svg";
 import close__chat from "../assets/close__chat.svg";
 
-const Room4 = () => {
+const Room4 = ({ isDoctor }) => {
   const socket = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
-  const [isDoctor, setIsDoctor] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
 
   const [openChat, setOpenChat] = useState(false);
   const toggleChat = () => {
@@ -26,13 +27,6 @@ const Room4 = () => {
 
   const preview = useCallback(async () => {
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert(
-          "Your browser does not support accessing media devices. Please use a modern browser like Chrome, Edge, or Firefox and ensure the app is served over HTTPS."
-        );
-        console.error("MediaDevices API is not available.");
-        return;
-      }
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true,
@@ -48,12 +42,8 @@ const Room4 = () => {
 
   const handleJoining = useCallback((data) => {
     console.log("data is", data);
-    setIsDoctor(data.isDoctor);
     if (data.user) {
       setRemoteSocketId(data.user);
-    }
-    if(!isDoctor){
-      preview();
     }
   }, []);
 
@@ -118,32 +108,22 @@ const Room4 = () => {
     }
   }, [remoteSocketId, socket]);
 
+  const sendMessage = (message) => {
+    console.log("message is", message);
+    if (peer.dataChannel) {
+      console.log("Data channel state:", peer.dataChannel);
+      const response = peer.dataChannel.send(message.toString());
+      console.log("Message sent:", response);
+    } else {
+      console.log("Data channel is not ready yet.");
+    }
+  };  
+
   const handleIncommingCall = useCallback(
     async ({ from, offer }) => {
       setRemoteSocketId(from);
       const ans = await peer.getAnswer(offer);
       socket.emit("call:accepted", { to: from, ans });
-      // if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      //   alert("Your browser does not support accessing media devices.");
-      //   console.error("MediaDevices API is not available.");
-      //   return;
-      // }
-
-      // try {
-      //   const stream = await navigator.mediaDevices.getUserMedia({
-      //     audio: true,
-      //     video: true,
-      //   });
-      //   setMyStream(stream);
-      //   console.log(`Incoming Call`, from, offer);
-      //   const ans = await peer.getAnswer(offer);
-      //   socket.emit("call:accepted", { to: from, ans });
-      // } catch (error) {
-      //   console.error("Error accessing media devices:", error);
-      //   alert(
-      //     "Error accessing your camera or microphone. Please check your permissions."
-      //   );
-      // }
     },
     [socket]
   );
@@ -159,7 +139,7 @@ const Room4 = () => {
   const handleCallAccepted = useCallback(
     ({ from, ans }) => {
       peer.setLocalDescription(ans);
-      console.log("Call Accepted!");
+      console.log("Call Accepted!", peer);
       sendStreams();
     },
     [sendStreams]
@@ -199,7 +179,18 @@ const Room4 = () => {
   }, []);
 
   useEffect(() => {
+    if (peer.dataChannel) {
+      console.log("inside", peer.dataChannel.onmessage);
+      peer.dataChannel.onmessage = (event) => {
+        console.log("setting new messages", event);
+        setMessages((prevMessages) => [...prevMessages, event.data]);
+      };
+    }
+  }, [peer.dataChannel]);
+
+  useEffect(() => {
     socket.on("room:joined", handleJoining);
+    preview();
     socket.on("user:joined", handleUserJoined);
     socket.on("incomming:call", handleIncommingCall);
     socket.on("call:accepted", handleCallAccepted);
@@ -233,11 +224,9 @@ const Room4 = () => {
         <h4>
           {remoteSocketId ? `Connected ${remoteSocketId}` : "No one in room"}
         </h4>
-        <h4>
-          Is Doctor: {isDoctor.toString()}
-        </h4>
+        <h4>Is Doctor: {isDoctor.toString()}</h4>
         {/* actual join below */}
-        {myStream && remoteSocketId && !(isDoctor === "doctor") &&(
+        {myStream && remoteSocketId && isDoctor === "patient" && (
           <button
             onClick={sendStreams}
             className="bg-green-500 text-white rounded-full px-6 py-2"
@@ -246,7 +235,7 @@ const Room4 = () => {
           </button>
         )}
         {/* actual call below */}
-        {myStream && remoteSocketId && (isDoctor === "doctor") && (
+        {myStream && remoteSocketId && isDoctor === "doctor" && (
           <button
             onClick={handleCallUser}
             className="bg-green-500 text-white rounded-full px-6 py-2"
@@ -293,27 +282,52 @@ const Room4 = () => {
           </div>
 
           {/* chatting */}
-          <div>
-            {/* 
-            looking forward to store message with from and sentAt 
-            then render them as div
-            w-full px-3 py-1
-            position-x = right if send from remoteSocketID
-            position-y = sort messages based on sentAt
-
-            */}
-          </div>
+          {isChatting && (
+            <div>
+              {/* 
+              looking forward to store message with from and sentAt 
+              then render them as div
+              w-full px-3 py-1
+              position-x = right if send from remoteSocketID
+              position-y = sort messages based on sentAt
+  
+              */}
+              <ul>
+                {messages.map((msg, index) => (
+                  <li key={index}>{msg}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* consultation notes */}
+          {!isChatting && (
+            <div>
+              {/* 
+              looking forward to store message with from and sentAt 
+              then render them as div
+              w-full px-3 py-1
+              position-x = right if send from remoteSocketID
+              position-y = sort messages based on sentAt
+  
+              */}
+            </div>
+          )}
 
           {/* text-input */}
-          <div>
-            <input type="text" className="p-3" />
+          <div className="flex justify-between items-center gap-3">
+            <input
+              type="text"
+              value={text}
+              className="p-3 border border-solid border-red-500"
+              onChange={(e) => setText(e.target.value)}
+            />
+            {/* add data to consultation notes or send chat based on isChatting */}
             <button
               onClick={() => {
-                console.log("clicked");
-                // add data to consultation notes or send chat based on isChatting
+                isChatting ? sendMessage(text) : setText("");
               }}
+              className="w-4 h-2"
             >
               send
             </button>

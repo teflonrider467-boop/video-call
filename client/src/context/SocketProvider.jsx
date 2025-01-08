@@ -1,4 +1,4 @@
-import React, { createContext, useMemo, useContext } from "react";
+import { createContext, useMemo, useContext } from "react";
 import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
@@ -8,7 +8,7 @@ export const useSocket = () => {
   return socket;
 };
 
-const ip = 16;
+const ip = 11;
 
 export const SocketProvider = (props) => {
   const socket = useMemo(() => io(`192.168.1.${ip}:8000`), []);
