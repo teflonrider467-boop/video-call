@@ -47,51 +47,111 @@ const Room4 = ({ isDoctor }) => {
     }
   }, []);
 
-  useEffect(() => {
+  const [isCamera, setIsCamera] = useState(true); // use this for changing image
+
+  const [isMic, setIsMic] = useState(true); // use this for changing image
+
+  const sendStreams = useCallback(() => {
     if (myStream) {
-      setIsCamera(myStream.getVideoTracks()[0].enabled);
-      setIsMic(myStream.getAudioTracks()[0].enabled);
+      for (const track of myStream.getTracks()) {
+        peer.peer.addTrack(track, myStream);
+      }
     }
   }, [myStream]);
 
-  const [isCamera, setIsCamera] = useState(true); // use this for changing image
-  const toggleCamera = () => {
-    if (isCamera) {
+  useEffect(() => {
+    if (myStream) {
       myStream.getVideoTracks().forEach((track) => (track.enabled = isCamera));
-      setIsCamera(false);
-    } else {
-      myStream.getVideoTracks().forEach((track) => (track.enabled = isCamera));
-      setIsCamera(true);
+      myStream.getAudioTracks().forEach((track) => (track.enabled = isMic));
+      // myStream.getVideoTracks()[0].enabled = isCamera;
+      // myStream.getAudioTracks()[0].enabled = isMic;
+      // setIsCamera(videoTracks.length > 0 ? videoTracks[0].enabled : false);
+      // const audioTracks = myStream.getAudioTracks();
+      // setIsMic(audioTracks.length > 0 ? audioTracks[0].enabled : false);
     }
+  }, [isCamera, isMic, myStream]);
+
+  
+  const toggleCamera = async () => {
+    setIsCamera(prev => !prev);
+    console.log("is camera", isCamera, myStream.getVideoTracks()[0].enabled);
+    // stop myStream track
+    peer.peer.removeTrack();
+    // getUserMedia again pass isCamera for video
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: isMic,
+      video: isCamera,
+    });
+    setMyStream(stream);
+    // sendStream
+    sendStreams();
   };
+  // Function to toggle camera
   // const toggleCamera = () => {
-  //   if (isCamera) {
-  //     myStream.getVideoTracks()[0].enabled = false;
-  //     setIsCamera(false);
+  //   // Get the video track from the media stream
+  //   const videoTrack = myStream?.getVideoTracks()[0];
+
+  //   if (videoTrack) {
+  //     // Toggle the enabled property of the video track
+  //     videoTrack.enabled = !isCamera;
+  //     // Update the state to reflect the new camera status
+  //     setIsCamera((prev) => !prev);
+  //   }
+  // };
+  //  if (isCamera) {
+  //    myStream.getVideoTracks().forEach((track) => (track.enabled = isCamera));
+  //    console.log("video is", myStream.getVideoTracks());
+  //    setIsCamera(false);
+  //  } else {
+  //    myStream.getVideoTracks().forEach((track) => (track.enabled = isCamera));
+  //    console.log("video is", myStream.getVideoTracks());
+  //    setIsCamera(true);
+  //  }
+  // const toggleCamera = () => {
+  //   if (myStream) {
+  //       const videoTracks = myStream.getVideoTracks();
+  //       console.log("is Camera is", isCamera);
+  //       if (isCamera) {
+  //           setIsCamera(false);
+  //           videoTracks[0].enabled = false;
+  //           console.log("is Camera", isCamera, videoTracks[0].enabled);
+  //       } else {
+  //         setIsCamera(true);
+  //         videoTracks[0].enabled = true;
+  //         console.log("is Camera", isCamera, videoTracks[0].enabled);
+  //       }
   //   } else {
-  //     myStream.getVideoTracks()[0].enabled = true;
-  //     setIsCamera(true);
+  //       console.warn("No media stream found to toggle the camera.");
   //   }
   // };
 
-  const [isMic, setIsMic] = useState(true); // use this for changing image
+  
   const toggleMic = () => {
-    if (isMic) {
-      myStream.getAudioTracks().forEach((track) => (track.enabled = isMic));
-      setIsMic(false);
-    } else {
-      myStream.getAudioTracks().forEach((track) => (track.enabled = isMic));
-      setIsMic(true);
-    }
+    setIsMic(prev => !prev);
+    console.log("is mic", isMic, myStream.getAudioTracks()[0].enabled);
   };
+    // if (isMic) {
+    //   myStream.getAudioTracks().forEach((track) => (track.enabled = isMic));
+    //   setIsMic(false);
+    // } else {
+    //   myStream.getAudioTracks().forEach((track) => (track.enabled = isMic));
+    //   setIsMic(true);
+    // }
   // const toggleMic = () => {
-  //   if (isMic) {
-  //     myStream.getAudioTracks()[0].enabled = false;
-  //     setIsMic(false);
-  //   } else {
-  //     myStream.getAudioTracks()[0].enabled = true;
-  //     setIsMic(true);
-  //   }
+  //   if (myStream) {
+  //     const audioTracks = myStream.getVideoTracks();
+  //     if (isMic) {
+  //       audioTracks[0].enabled = false;
+  //       setIsMic(false);
+  //       console.log("is Mic", isMic, audioTracks[0].enabled);
+  //     } else {
+  //       audioTracks[0].enabled = true;
+  //       setIsMic(true);
+  //       console.log("is Mic", isMic, audioTracks[0].enabled);
+  //     }
+  // } else {
+  //     console.warn("No media stream found to toggle the camera.");
+  // }
   // };
 
   const handleUserJoined = useCallback(({ email, id }) => {
@@ -132,14 +192,6 @@ const Room4 = ({ isDoctor }) => {
     },
     [socket]
   );
-
-  const sendStreams = useCallback(() => {
-    if (myStream) {
-      for (const track of myStream.getTracks()) {
-        peer.peer.addTrack(track, myStream);
-      }
-    }
-  }, [myStream]);
 
   const handleCallAccepted = useCallback(
     ({ from, ans }) => {
@@ -366,10 +418,11 @@ const Room4 = ({ isDoctor }) => {
                   {/* <h1>My Stream</h1> */}
                   <ReactPlayer
                     playing
-                    muted
+                    // muted
                     height="100%"
                     width="100%"
                     url={myStream}
+                    controls={true}
                   />
                 </>
               ) : (
@@ -397,49 +450,6 @@ const Room4 = ({ isDoctor }) => {
                 </>
               )}
             </div>
-
-            {/* controls below */}
-            {/* <div
-            className="flex justify-center items-center gap-12 py-3 w-full h-[13%]"
-            style={{ backgroundColor: "#9DA5B8" }}
-          >
-            <div
-              className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
-              onClick={toggleCamera}
-            >
-              <img
-                src={video__controls}
-                alt=""
-                className={`${isCamera ? "hidden" : "block"}`}
-              />
-              <img
-                src={not__video__controls}
-                alt=""
-                className={`${isCamera ? "block" : "hidden"}`}
-              />
-            </div>
-            <div
-              className="rounded-[22px] w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
-              style={{ backgroundColor: "#FF0000" }}
-            >
-              <img src={end__call} alt="" />
-            </div>
-            <div
-              className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
-              onClick={toggleMic}
-            >
-              <img
-                src={mic__controls}
-                alt=""
-                className={`${isMic ? "hidden" : "block"}`}
-              />
-              <img
-                src={not__mic__controls}
-                alt=""
-                className={`${isMic ? "block" : "hidden"}`}
-              />
-            </div>
-          </div> */}
           </div>
 
           {/* controls below */}
@@ -451,16 +461,16 @@ const Room4 = ({ isDoctor }) => {
               className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
               onClick={toggleCamera}
             >
-              <img
+              {
+              isCamera ? <img
                 src={video__controls}
                 alt=""
-                className={`${isCamera ? "hidden" : "block"}`}
-              />
+              />:
               <img
                 src={not__video__controls}
                 alt=""
-                className={`${isCamera ? "block" : "hidden"}`}
               />
+              }
             </div>
             <div
               className="rounded-[22px] w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
@@ -472,16 +482,16 @@ const Room4 = ({ isDoctor }) => {
               className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
               onClick={toggleMic}
             >
+              {isMic ? 
               <img
-                src={mic__controls}
-                alt=""
-                className={`${isMic ? "hidden" : "block"}`}
-              />
-              <img
+              src={mic__controls}
+              alt=""
+            />:
+            <img
                 src={not__mic__controls}
                 alt=""
-                className={`${isMic ? "block" : "hidden"}`}
               />
+            }
             </div>
           </div>
         </div>

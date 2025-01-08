@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/SocketProvider";
 
 const Lobby = ({setIsDoctor, isDoctor}) => {
-  const [startTime, setStartTime] = useState("15:55"); // Time in IST
+  const [startTime, setStartTime] = useState("19:05"); // Time in IST
   const [appointmentDate, setAppointmentDate] = useState("2025-01-08"); // Date in IST
   const [email, setEmail] = useState("");
   const [room, setRoom] = useState("");
