@@ -316,10 +316,7 @@ const Room4 = ({ isDoctor }) => {
           )}
 
           {/* consultation notes */}
-          {!isChatting && (
-            <div className="w-full">
-            </div>
-          )}
+          {!isChatting && <div className="w-full"></div>}
 
           {/* text-input */}
           <div className="flex justify-between items-center gap-3 w-full">
@@ -344,64 +341,65 @@ const Room4 = ({ isDoctor }) => {
 
         {/* video */}
         <div className="flex flex-col justify-start items-center gap-0 h-full w-full">
-        <div className="relative h-full w-full bg-black">
-          {/* button to open chat */}
-          <div className="absolute top-[5%] left-[2%] bg-white rounded-full p-3">
-            <img
-              src={close__chat}
-              alt=""
-              className={`${openChat ? "hidden" : ""}`}
-              onClick={toggleChat}
-            />
-            <img
-              src={open__chat}
-              alt=""
-              className={`${openChat ? "" : "hidden"}`}
-              onClick={toggleChat}
-            />
-          </div>
+          {/* video streams below */}
+          <div className="relative h-full w-full bg-black">
+            {/* button to open chat */}
+            <div className="absolute top-[5%] left-[2%] bg-white rounded-full p-3">
+              <img
+                src={close__chat}
+                alt=""
+                className={`${openChat ? "hidden" : ""}`}
+                onClick={toggleChat}
+              />
+              <img
+                src={open__chat}
+                alt=""
+                className={`${openChat ? "" : "hidden"}`}
+                onClick={toggleChat}
+              />
+            </div>
 
-          {/* preview of personal video */}
-          <div className="absolute right-10 w-60 h-60 bottom-0">
-            {myStream ? (
-              <>
-                {/* <h1>My Stream</h1> */}
-                <ReactPlayer
-                  playing
-                  muted
-                  height="100%"
-                  width="100%"
-                  url={myStream}
-                />
-              </>
-            ) : (
-              <>
-                <div className="bg-black w-full h-full"></div>
-              </>
-            )}
-          </div>
+            {/* preview of personal video */}
+            <div className="absolute right-10 w-60 h-60 bottom-0">
+              {myStream ? (
+                <>
+                  {/* <h1>My Stream</h1> */}
+                  <ReactPlayer
+                    playing
+                    muted
+                    height="100%"
+                    width="100%"
+                    url={myStream}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="bg-black w-full h-full"></div>
+                </>
+              )}
+            </div>
 
-          {/* view of person to call */}
-          <div className="w-full h-full">
-            {remoteStream ? (
-              <>
-                {/* <h1>Remote Stream</h1> */}
-                <ReactPlayer
-                  playing
-                  height="100%"
-                  width="100%"
-                  url={remoteStream}
-                />
-              </>
-            ) : (
-              <>
-                <div className="bg-black w-full h-full"></div>
-              </>
-            )}
-          </div>
+            {/* view of person to call */}
+            <div className="w-full h-full">
+              {remoteStream ? (
+                <>
+                  {/* <h1>Remote Stream</h1> */}
+                  <ReactPlayer
+                    playing
+                    height="100%"
+                    width="100%"
+                    url={remoteStream}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="bg-black w-full h-full"></div>
+                </>
+              )}
+            </div>
 
-          {/* controls below */}
-          {/* <div
+            {/* controls below */}
+            {/* <div
             className="flex justify-center items-center gap-12 py-3 w-full h-[13%]"
             style={{ backgroundColor: "#9DA5B8" }}
           >
@@ -442,9 +440,10 @@ const Room4 = ({ isDoctor }) => {
               />
             </div>
           </div> */}
-        </div>
-        {/* controls below */}
-        <div
+          </div>
+
+          {/* controls below */}
+          <div
             className="flex justify-center items-center gap-12 py-3 w-full h-[13%]"
             style={{ backgroundColor: "#9DA5B8" }}
           >
