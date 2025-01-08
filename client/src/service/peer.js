@@ -18,6 +18,7 @@ class PeerService {
     async createDataChannel() {
         // Create a new data channel for sending and receiving messages
         const dataChannel = this.peer.createDataChannel("chat", { negotiated: true, id: 0 });
+        // need to change id:0 to id: vtalix_appointment_2 for uniqueness, id is a unique identifier to the data channel
 
         // Handle message sending and receiving through the data channel
         dataChannel.onopen = () => {

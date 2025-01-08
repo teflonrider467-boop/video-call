@@ -18,7 +18,7 @@ const Room4 = ({ isDoctor }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
-  const [openChat, setOpenChat] = useState(false);
+  const [openChat, setOpenChat] = useState(true);
   const toggleChat = () => {
     setOpenChat((prev) => !prev);
   };
@@ -112,12 +112,17 @@ const Room4 = ({ isDoctor }) => {
     console.log("message is", message);
     if (peer.dataChannel) {
       console.log("Data channel state:", peer.dataChannel);
-      const response = peer.dataChannel.send(message.toString());
-      console.log("Message sent:", response);
+      let data = { text: message, self: false };
+      console.log("data is: ", data);
+      peer.dataChannel.send(JSON.stringify(data));
+      data.self = true;
+      console.log("data snow is:", data);
+      messages.push(data);
+      console.log("message now is:", messages);
     } else {
       console.log("Data channel is not ready yet.");
     }
-  };  
+  };
 
   const handleIncommingCall = useCallback(
     async ({ from, offer }) => {
@@ -182,8 +187,11 @@ const Room4 = ({ isDoctor }) => {
     if (peer.dataChannel) {
       console.log("inside", peer.dataChannel.onmessage);
       peer.dataChannel.onmessage = (event) => {
-        console.log("setting new messages", event);
-        setMessages((prevMessages) => [...prevMessages, event.data]);
+        console.log("setting new messages", JSON.parse(event.data));
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          JSON.parse(event.data),
+        ]);
       };
     }
   }, [peer.dataChannel]);
@@ -218,7 +226,7 @@ const Room4 = ({ isDoctor }) => {
   ]);
 
   return (
-    <div>
+    <div className="w-full h-dvh">
       <div className="fixed top-0 right-1/4 bg-red-600 z-50 mx-auto flex flex-col justify-center items-center">
         <h1 className="text-4xl">Room Page</h1>
         <h4>
@@ -247,7 +255,7 @@ const Room4 = ({ isDoctor }) => {
 
       {/* below is where magic happens */}
       <div
-        className={`grid h-dvh py-2 ${
+        className={`grid h-full p-1 w-full  ${
           openChat ? "grid-cols-[42.19%_57.81%]" : "grid-cols-1"
         } `}
       >
@@ -260,7 +268,7 @@ const Room4 = ({ isDoctor }) => {
           {/* nav */}
           <div className="flex justify-start items-center gap-5 pb-1 border border-x-0 border-t-0 w-full">
             <p
-              className={` underline-offset-4 hover:underline font-medium cursor-pointer ${
+              className={` underline-offset-4 hover:underline text-2xl font-medium cursor-pointer ${
                 isChatting
                   ? "text-orange-500 underline text-primary-orange"
                   : "text-black"
@@ -270,7 +278,7 @@ const Room4 = ({ isDoctor }) => {
               Chat
             </p>
             <p
-              className={` underline-offset-4 hover:underline font-medium cursor-pointer ${
+              className={` underline-offset-4 hover:underline text-2xl font-medium cursor-pointer ${
                 !isChatting
                   ? "text-orange-500 underline text-primary-orange"
                   : "text-black"
@@ -283,18 +291,25 @@ const Room4 = ({ isDoctor }) => {
 
           {/* chatting */}
           {isChatting && (
-            <div>
-              {/* 
-              looking forward to store message with from and sentAt 
-              then render them as div
-              w-full px-3 py-1
-              position-x = right if send from remoteSocketID
-              position-y = sort messages based on sentAt
-  
-              */}
-              <ul>
+            <div className="w-full">
+              <ul className="w-full p-2 h-dvh overflow-y-auto">
                 {messages.map((msg, index) => (
-                  <li key={index}>{msg}</li>
+                  <li
+                    key={index}
+                    className={`w-full h-fit p-2 flex items-center ${
+                      msg.self ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`w-1/2 rounded-t-3xl px-4 py-2 text-left ${
+                        msg.self
+                          ? "bg-gray-200 rounded-bl-3xl rounded-br-md"
+                          : "bg-orange-200 rounded-br-3xl rounded-bl-md"
+                      }`}
+                    >
+                      {msg.text}
+                    </div>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -302,24 +317,17 @@ const Room4 = ({ isDoctor }) => {
 
           {/* consultation notes */}
           {!isChatting && (
-            <div>
-              {/* 
-              looking forward to store message with from and sentAt 
-              then render them as div
-              w-full px-3 py-1
-              position-x = right if send from remoteSocketID
-              position-y = sort messages based on sentAt
-  
-              */}
+            <div className="w-full">
             </div>
           )}
 
           {/* text-input */}
-          <div className="flex justify-between items-center gap-3">
+          <div className="flex justify-between items-center gap-3 w-full">
             <input
               type="text"
               value={text}
-              className="p-3 border border-solid border-red-500"
+              placeholder="Type a message..."
+              className="py-3.5 px-6 border border-solid border-red-500 rounded-lg grow"
               onChange={(e) => setText(e.target.value)}
             />
             {/* add data to consultation notes or send chat based on isChatting */}
@@ -327,7 +335,7 @@ const Room4 = ({ isDoctor }) => {
               onClick={() => {
                 isChatting ? sendMessage(text) : setText("");
               }}
-              className="w-4 h-2"
+              className="px-3 h-full bg-red-500 text-white"
             >
               send
             </button>
@@ -335,7 +343,8 @@ const Room4 = ({ isDoctor }) => {
         </div>
 
         {/* video */}
-        <div className="relative flex flex-col justify-start items-center gap-0 h-full w-full bg-black">
+        <div className="flex flex-col justify-start items-center gap-0 h-full w-full">
+        <div className="relative h-full w-full bg-black">
           {/* button to open chat */}
           <div className="absolute top-[5%] left-[2%] bg-white rounded-full p-3">
             <img
@@ -353,7 +362,7 @@ const Room4 = ({ isDoctor }) => {
           </div>
 
           {/* preview of personal video */}
-          <div className="absolute right-0 w-60 h-60 bottom-10">
+          <div className="absolute right-10 w-60 h-60 bottom-0">
             {myStream ? (
               <>
                 {/* <h1>My Stream</h1> */}
@@ -373,7 +382,7 @@ const Room4 = ({ isDoctor }) => {
           </div>
 
           {/* view of person to call */}
-          <div className="w-fit h-full">
+          <div className="w-full h-full">
             {remoteStream ? (
               <>
                 {/* <h1>Remote Stream</h1> */}
@@ -392,7 +401,50 @@ const Room4 = ({ isDoctor }) => {
           </div>
 
           {/* controls below */}
-          <div
+          {/* <div
+            className="flex justify-center items-center gap-12 py-3 w-full h-[13%]"
+            style={{ backgroundColor: "#9DA5B8" }}
+          >
+            <div
+              className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
+              onClick={toggleCamera}
+            >
+              <img
+                src={video__controls}
+                alt=""
+                className={`${isCamera ? "hidden" : "block"}`}
+              />
+              <img
+                src={not__video__controls}
+                alt=""
+                className={`${isCamera ? "block" : "hidden"}`}
+              />
+            </div>
+            <div
+              className="rounded-[22px] w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
+              style={{ backgroundColor: "#FF0000" }}
+            >
+              <img src={end__call} alt="" />
+            </div>
+            <div
+              className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
+              onClick={toggleMic}
+            >
+              <img
+                src={mic__controls}
+                alt=""
+                className={`${isMic ? "hidden" : "block"}`}
+              />
+              <img
+                src={not__mic__controls}
+                alt=""
+                className={`${isMic ? "block" : "hidden"}`}
+              />
+            </div>
+          </div> */}
+        </div>
+        {/* controls below */}
+        <div
             className="flex justify-center items-center gap-12 py-3 w-full h-[13%]"
             style={{ backgroundColor: "#9DA5B8" }}
           >

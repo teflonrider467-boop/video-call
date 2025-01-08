@@ -11,7 +11,7 @@ function App() {
   const [isDoctor, setIsDoctor] = useState("");
 
   return (
-    <>
+    <div className='w-full'>
     <Routes>
       <Route path='/' element={<Lobby setIsDoctor={setIsDoctor} isDoctor={isDoctor} />}></Route>
       <Route path='/room/:roomId' element={<Room />}></Route>
@@ -19,7 +19,7 @@ function App() {
       <Route path='/room3/:roomId' element={<Room3 />}></Route>
       <Route path='/room4/:roomId' element={<Room4 isDoctor={isDoctor} />}></Route>
     </Routes>
-    </>
+    </div>
   )
 }
 
