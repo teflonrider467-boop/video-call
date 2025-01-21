@@ -83,11 +83,12 @@ io.on("connection", (socket) => {
 
   // Handle call events
   socket.on("user:call", ({ to, offer }) => {
-    // console.log("hit");
+    console.log("hit", offer);
     io.to(to).emit("incomming:call", { from: socket.id, offer });
   });
 
   socket.on("call:accepted", ({ to, ans }) => {
+    console.log("hit", ans);
     io.to(to).emit("call:accepted", { from: socket.id, ans });
   });
 

@@ -26,7 +26,6 @@ class PeerService {
         };
 
         dataChannel.onmessage = (event) => {
-            console.log("in");
             console.log("Message from Data Channel:", event.data);
         };
 

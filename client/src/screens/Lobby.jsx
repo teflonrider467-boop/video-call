@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/SocketProvider";
 
 const Lobby = ({setIsDoctor, isDoctor}) => {
-  const [startTime, setStartTime] = useState("19:05"); // Time in IST
-  const [appointmentDate, setAppointmentDate] = useState("2025-01-08"); // Date in IST
+  const [startTime, setStartTime] = useState("18:30"); // Time in IST
+  const [appointmentDate, setAppointmentDate] = useState("2025-01-10"); // Date in IST
   const [email, setEmail] = useState("");
   const [room, setRoom] = useState("");
 
@@ -35,7 +35,7 @@ const Lobby = ({setIsDoctor, isDoctor}) => {
   const handleJoinRoom = useCallback(
     (data) => {
       const { room } = data;
-      navigate(`/room4/${room}`);
+      navigate(`/room5/${room}`);
     },
     [navigate]
   );
@@ -134,3 +134,190 @@ const Lobby = ({setIsDoctor, isDoctor}) => {
   // } ,[navigateTo]);
 
 export default Lobby;
+
+// if (myStream) {
+    //   // Stop the current video tracks
+    //   myStream.getVideoTracks().forEach((track) => track.stop());
+  
+    //   // If the camera is on, turn it off by getting a new stream without video
+    //   if (isCamera) {
+    //     setIsCamera(false);
+    //     const stream = await navigator.mediaDevices.getUserMedia({ audio: isMic, video: false });
+    //     setMyStream(stream);
+  
+    //     // Replace the current tracks in the peer connection
+    //     const senders = peer.peer.getSenders().filter((sender) => sender.track.kind === "video");
+    //     senders.forEach((sender) => peer.peer.removeTrack(sender));
+  
+    //     stream.getTracks().forEach((track) => {
+    //       peer.peer.addTrack(track, stream);
+    //     });
+    //   } else {
+    //     // If the camera is off, turn it on by getting a new stream with video
+    //     setIsCamera(true);
+    //     const stream = await navigator.mediaDevices.getUserMedia({ audio: isMic, video: true });
+    //     setMyStream(stream);
+  
+    //     // Replace the current tracks in the peer connection
+    //     const senders = peer.peer.getSenders().filter((sender) => sender.track.kind === "video");
+    //     senders.forEach((sender) => peer.peer.removeTrack(sender));
+  
+    //     stream.getTracks().forEach((track) => {
+    //       peer.peer.addTrack(track, stream);
+    //     });
+    //   }
+
+        // stop myStream track
+    // peer.peer.removeTrack();
+    
+    // getUserMedia again pass isCamera for video
+    // const stream = await navigator.mediaDevices.getUserMedia({
+    //   audio: isMic,
+    //   video: isCamera,
+    // });
+    //setMyStream(stream);
+    
+    // sendStream
+    //sendStreams();
+
+      // useEffect(() => {
+  //   if (myStream) {
+  //     myStream.getVideoTracks().forEach((track) => (track.enabled = isCamera));
+  //     myStream.getAudioTracks().forEach((track) => (track.enabled = isMic));
+  //     // myStream.getVideoTracks()[0].enabled = isCamera;
+  //     // myStream.getAudioTracks()[0].enabled = isMic;
+  //     // setIsCamera(videoTracks.length > 0 ? videoTracks[0].enabled : false);
+  //     // const audioTracks = myStream.getAudioTracks();
+  //     // setIsMic(audioTracks.length > 0 ? audioTracks[0].enabled : false);
+  //   }
+  // }, [isCamera, isMic, myStream]);
+
+  // try {
+        // if (isMic) {
+          // Turn off mic: stop all audio tracks in the current stream
+          // myStream.getAudioTracks().forEach((track) => track.stop());
+          // setIsMic(false);
+          // console.log("Mic turned off.");
+        // } else {
+          // Turn on mic: get a new audio track and add it to the stream
+          // const newStream = await navigator.mediaDevices.getUserMedia({
+            // audio: true,
+            // video: false,
+          // });
+    
+          // const newAudioTrack = newStream.getAudioTracks()[0];
+          // setIsMic(true);
+          // console.log("Mic turned on.");
+    
+          // Replace the old audio track in the peer connection
+          // myStream.addTrack(newAudioTrack);
+    
+          // Update `myStream` to include the new audio track
+          // setMyStream((prevStream) => {
+            // const updatedStream = new MediaStream([
+              // ...prevStream.getVideoTracks(),
+              // newAudioTrack,
+            // ]);
+            // return updatedStream;
+          // });
+    
+          // Notify peers about the updated stream
+          // const senders = peer.peer.getSenders();
+          // const audioSender = senders.find((sender) => sender.track.kind === "audio");
+          // if (audioSender) {
+            // audioSender.replaceTrack(newAudioTrack);
+          // }
+        // }
+      // } catch (error) {
+        // console.error("Error toggling mic:", error);
+      // }
+      
+      // stop myStream track
+      // peer.peer.removeTrack();
+      
+      // getUserMedia again pass isCamera for video
+      // const stream = await navigator.mediaDevices.getUserMedia({
+        // audio: isMic,
+        // video: isCamera,
+      // });
+      // setMyStream(stream);
+      
+      // sendStream
+      // sendStreams();
+
+      // from line 126
+
+        //   if(isCamera){
+        //     console.log("stopping video");
+        //     setIsCamera(false);
+        //     myStream.getVideoTracks().forEach((track) => (track.enabled = false));
+        //     myStream.getVideoTracks()[0].enabled = false;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = false;
+        //     // const stream = await navigator.mediaDevices.getUserMedia({ audio: isMic, video: false });
+        //     // const videoTrack = await stream.getVideoTracks();
+        //     // peer.replaceTrack(videoTrack);
+        //     // setMyStream(stream);
+        //     console.log("is camera", isCamera);
+        //   }else{
+        //     console.log("starting video");
+        //     setIsCamera(true);
+        //     myStream.getVideoTracks().forEach((track) => (track.enabled = true));
+        //     myStream.getVideoTracks()[0].enabled = true;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = true;
+        //     // const stream = await navigator.mediaDevices.getUserMedia({ audio: isMic, video: true });
+        //     // setMyStream(stream);
+        //     console.log("is camera", isCamera);
+        //   }
+      
+        //   // console.log("is camera", isCamera, myStream.getVideoTracks()[0].enabled);
+        //   // myStream.getVideoTracks().forEach((track) => console.log("track enabled", track.enabled));
+      
+        //   if(myStream.getVideoTracks()[0].enabled){
+        //     setIsCamera(false);
+        //     myStream.getVideoTracks().forEach((track) => (track.enabled = false));
+        //     myStream.getVideoTracks()[0].enabled = false;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = false;
+        //     console.log("is camera", isCamera);
+        //   }else{
+        //     setIsCamera(true);
+        //     myStream.getVideoTracks().forEach((track) => (track.enabled = true));
+        //     myStream.getVideoTracks()[0].enabled = true;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = true;
+        //     console.log("is camera", isCamera);
+        //   }
+        
+        //     // Update the ReactPlayer
+        //     console.log("Camera toggled. Current state:", isCamera);
+        //   }
+        
+        // const toggleMic = async () => {
+        //   if(isMic){
+        //     setIsMic(false);
+        //     myStream.getAudioTracks().forEach((track) => (track.enabled = false));
+        //     myStream.getAudioTracks()[0].enabled = false;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = false;
+        //     // const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: isCamera });
+        //     // setMyStream(stream);
+        //   }else{
+        //     setIsMic(true);
+        //     myStream.getAudioTracks().forEach((track) => (track.enabled = true));
+        //     myStream.getAudioTracks()[0].enabled = true;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = true;
+        //     // const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isCamera });
+        //     // setMyStream(stream);
+        //   }
+        //   // console.log("is mic", isMic, myStream.getAudioTracks()[0].enabled);
+        //   // myStream.getAudioTracks().forEach((track) => console.log("track enabled", track.enabled));
+      
+        //   if(myStream.getAudioTracks()[0].enabled){
+        //     setIsMic(false);
+        //     myStream.getAudioTracks().forEach((track) => (track.enabled = false));
+        //     myStream.getAudioTracks()[0].enabled = false;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = false;
+        //   }else{
+        //     setIsMic(true);
+        //     myStream.getAudioTracks().forEach((track) => (track.enabled = true));
+        //     myStream.getAudioTracks()[0].enabled = true;
+        //     myStream.getTracks().find((track) => track.kind === "audio").enabled = true;
+        //   }
+        // };

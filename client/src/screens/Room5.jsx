@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
@@ -18,6 +18,12 @@ const Room4 = ({ isDoctor }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
+  const myStreamRef = useRef();
+  const remoteStreamRef = useRef();
+  const isCameraRef = useRef();
+  const isMicRef = useRef();
+  const remoteSocketIdRef = useRef();
+
   const [openChat, setOpenChat] = useState(true);
   const toggleChat = () => {
     setOpenChat((prev) => !prev);
@@ -32,6 +38,7 @@ const Room4 = ({ isDoctor }) => {
         video: true,
       });
       setMyStream(stream);
+      myStreamRef.current = stream;
     } catch (error) {
       console.error("Error accessing media devices:", error);
       alert(
@@ -44,6 +51,7 @@ const Room4 = ({ isDoctor }) => {
     console.log("data is", data);
     if (data.user) {
       setRemoteSocketId(data.user);
+      remoteSocketIdRef.current = data.user;
     }
   }, []);
 
@@ -53,11 +61,11 @@ const Room4 = ({ isDoctor }) => {
 
   const sendStreams = useCallback(() => {
     if (myStream) {
-      for (const track of myStream.getTracks()) {
-        peer.peer.addTrack(track, myStream);
+      for (const track of myStreamRef.current.getTracks()) {
+        peer.peer.addTrack(track, myStreamRef.current);
       }
     }
-  }, [myStream]);
+  }, [myStream, myStreamRef.current]);
 
   const toggleCamera = async () => {
     if (!myStream) {
@@ -70,22 +78,22 @@ const Room4 = ({ isDoctor }) => {
   
     if (videoTrack && videoTrack.enabled) {
       // Camera is on, replace with a stream without video
-      newStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+      newStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: isMicRef.current });
       const newVideoTrack = newStream.getVideoTracks()[0];
       
       // Replace the video track with no video
-      const sender = peerConnection.getSenders().find(sender => sender.track?.kind === 'video');
+      const sender = peer.peer.getSenders().find(sender => sender.track?.kind === 'video');
       if (sender) {
         sender.replaceTrack(newVideoTrack);  // Will replace with no video track
       }
       console.log("Camera turned off");
     } else {
       // Camera is off, replace with a stream with video
-      newStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      newStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: isMicRef.current });
       const newVideoTrack = newStream.getVideoTracks()[0];
       
       // Replace the video track with a video track
-      const sender = peerConnection.getSenders().find(sender => sender.track?.kind === 'video');
+      const sender = peer.peer.getSenders().find(sender => sender.track?.kind === 'video');
       if (sender) {
         sender.replaceTrack(newVideoTrack);  // Will replace with a video track
       }
@@ -124,12 +132,13 @@ const Room4 = ({ isDoctor }) => {
   const handleUserJoined = useCallback(({ email, id }) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
+    remoteSocketIdRef.current = id;
   }, []);
 
   const handleCallUser = useCallback(async () => {
     try {
       const offer = await peer.getOffer();
-      socket.emit("user:call", { to: remoteSocketId, offer });
+      socket.emit("user:call", { to: remoteSocketIdRef.current, offer });
     } catch (error) {
       console.error("Error calling:", error);
     }
@@ -149,6 +158,7 @@ const Room4 = ({ isDoctor }) => {
   const handleIncommingCall = useCallback(
     async ({ from, offer }) => {
       setRemoteSocketId(from);
+      remoteSocketIdRef(from);
       const ans = await peer.getAnswer(offer);
       socket.emit("call:accepted", { to: from, ans });
     },
@@ -166,7 +176,7 @@ const Room4 = ({ isDoctor }) => {
 
   const handleNegoNeeded = useCallback(async () => {
     const offer = await peer.getOffer();
-    socket.emit("peer:nego:needed", { offer, to: remoteSocketId });
+    socket.emit("peer:nego:needed", { offer, to: remoteSocketIdRef.current });
   }, [remoteSocketId, socket]);
 
   useEffect(() => {
@@ -193,6 +203,7 @@ const Room4 = ({ isDoctor }) => {
       console.log("ev is", ev);
       const remoteStream = ev.streams;
       setRemoteStream(remoteStream[0]);
+      remoteStreamRef.current = remoteStream[0];
     });
   }, []);
 
@@ -241,11 +252,11 @@ const Room4 = ({ isDoctor }) => {
       <div className="fixed top-0 right-1/4 bg-red-600 z-50 mx-auto flex flex-col justify-center items-center">
         <h1 className="text-4xl">Room Page</h1>
         <h4>
-          {remoteSocketId ? `Connected ${remoteSocketId}` : "No one in room"}
+          {remoteSocketIdRef.current ? `Connected ${remoteSocketId.current}` : "No one in room"}
         </h4>
         <h4>Is Doctor: {isDoctor.toString()}</h4>
         {/* actual join below */}
-        {myStream && remoteSocketId && isDoctor === "patient" && (
+        {myStream && remoteSocketIdRef.current && isDoctor === "patient" && (
           <button
             onClick={sendStreams}
             className="bg-green-500 text-white rounded-full px-6 py-2"
@@ -254,7 +265,7 @@ const Room4 = ({ isDoctor }) => {
           </button>
         )}
         {/* actual call below */}
-        {myStream && remoteSocketId && isDoctor === "doctor" && (
+        {myStream && remoteSocketIdRef.current && isDoctor === "doctor" && (
           <button
             onClick={handleCallUser}
             className="bg-green-500 text-white rounded-full px-6 py-2"
@@ -373,7 +384,7 @@ const Room4 = ({ isDoctor }) => {
             {/* preview of personal video */}
             <div className="absolute right-10 w-60 h-60 bottom-0">
               {myStream ? (
-                <>
+                <div className="w-60 h-60">
                   {/* <h1>My Stream</h1> */}
                   <ReactPlayer
                     playing
@@ -381,10 +392,10 @@ const Room4 = ({ isDoctor }) => {
                     // muted
                     height="100%"
                     width="100%"
-                    url={myStream}
-                    controls={true}
+                    // url={myStream}
+                    ref={myStreamRef.current}
                   />
-                </>
+                </div>
               ) : (
                 <>
                   <div className="bg-black w-full h-full"></div>
@@ -402,7 +413,8 @@ const Room4 = ({ isDoctor }) => {
                     playsinline
                     height="100%"
                     width="100%"
-                    url={remoteStream}
+                    ref={remoteStreamRef.current}
+                    // url={remoteStream}
                   />
                 </>
               ) : (
@@ -423,7 +435,7 @@ const Room4 = ({ isDoctor }) => {
               onClick={toggleCamera}
             >
               {
-              isCamera ? <img
+              isCameraRef.current ? <img
                 src={video__controls}
                 alt=""
               />:
@@ -443,7 +455,7 @@ const Room4 = ({ isDoctor }) => {
               className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
               onClick={toggleMic}
             >
-              {isMic ? 
+              {isMicRef.current ? 
               <img
               src={mic__controls}
               alt=""

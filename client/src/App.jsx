@@ -6,6 +6,7 @@ import Room2 from './screens/Room2';
 import Room3 from './screens/Room3';
 import Room4 from './screens/Room4';
 import { useState } from 'react';
+import Room5 from './screens/Room5';
 
 function App() {
   const [isDoctor, setIsDoctor] = useState("");
@@ -18,6 +19,7 @@ function App() {
       <Route path='/room2/:roomId' element={<Room2 />}></Route>
       <Route path='/room3/:roomId' element={<Room3 />}></Route>
       <Route path='/room4/:roomId' element={<Room4 isDoctor={isDoctor} />}></Route>
+      <Route path='/room5/:roomId' element={<Room5 isDoctor={isDoctor} />}></Route>
     </Routes>
     </div>
   )
