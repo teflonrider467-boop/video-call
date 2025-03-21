@@ -138,7 +138,7 @@ const Room4 = ({ isDoctor }) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
   }, []);
-  
+
   const handleCallUser = useCallback(async () => {
     try {
       const offer = await peer.getOffer();
@@ -279,34 +279,30 @@ const Room4 = ({ isDoctor }) => {
 
       {/* below is where magic happens */}
       <div
-        className={`grid h-full p-1 w-full  ${
-          openChat ? "grid-cols-[42.19%_57.81%]" : "grid-cols-1"
-        } `}
+        className={`grid h-full p-1 w-full  ${openChat ? "grid-cols-[42.19%_57.81%]" : "grid-cols-1"
+          } `}
       >
         {/* left side(non-video chat) */}
         <div
-          className={`flex flex-col justify-between items-start h-full ${
-            openChat ? "block" : "hidden"
-          }`}
+          className={`flex flex-col justify-between items-start h-full ${openChat ? "block" : "hidden"
+            }`}
         >
           {/* nav */}
           <div className="flex justify-start items-center gap-5 pb-1 border border-x-0 border-t-0 w-full">
             <p
-              className={` underline-offset-4 hover:underline text-2xl font-medium cursor-pointer ${
-                isChatting
+              className={` underline-offset-4 hover:underline text-2xl font-medium cursor-pointer ${isChatting
                   ? "text-orange-500 underline text-primary-orange"
                   : "text-black"
-              }`}
+                }`}
               onClick={() => setIsChatting(true)}
             >
               Chat
             </p>
             <p
-              className={` underline-offset-4 hover:underline text-2xl font-medium cursor-pointer ${
-                !isChatting
+              className={` underline-offset-4 hover:underline text-2xl font-medium cursor-pointer ${!isChatting
                   ? "text-orange-500 underline text-primary-orange"
                   : "text-black"
-              }`}
+                }`}
               onClick={() => setIsChatting(false)}
             >
               Consultation Notes
@@ -320,16 +316,14 @@ const Room4 = ({ isDoctor }) => {
                 {messages.map((msg, index) => (
                   <li
                     key={index}
-                    className={`w-full h-fit p-2 flex items-center ${
-                      msg.self ? "justify-end" : "justify-start"
-                    }`}
+                    className={`w-full h-fit p-2 flex items-center ${msg.self ? "justify-end" : "justify-start"
+                      }`}
                   >
                     <div
-                      className={`w-1/2 rounded-t-3xl px-4 py-2 text-left ${
-                        msg.self
+                      className={`w-1/2 rounded-t-3xl px-4 py-2 text-left ${msg.self
                           ? "bg-gray-200 rounded-bl-3xl rounded-br-md"
                           : "bg-orange-200 rounded-br-3xl rounded-bl-md"
-                      }`}
+                        }`}
                     >
                       {msg.text}
                     </div>
@@ -465,3 +459,4 @@ const Room4 = ({ isDoctor }) => {
 };
 
 export default Room4;
+// this comment is by anshul

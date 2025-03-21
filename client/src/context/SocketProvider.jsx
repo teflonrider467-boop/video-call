@@ -8,7 +8,7 @@ export const useSocket = () => {
   return socket;
 };
 
-const ip = 15;
+const ip = 37;
 
 export const SocketProvider = (props) => {
   const socket = useMemo(() => io(`192.168.1.${ip}:8000`), []);
