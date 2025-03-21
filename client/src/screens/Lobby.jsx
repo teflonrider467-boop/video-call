@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/SocketProvider";
 
 const Lobby = ({setIsDoctor, isDoctor}) => {
-  const [startTime, setStartTime] = useState("18:30"); // Time in IST
-  const [appointmentDate, setAppointmentDate] = useState("2025-01-10"); // Date in IST
+  const [startTime, setStartTime] = useState("16:45"); // Time in IST
+  const [appointmentDate, setAppointmentDate] = useState("2025-03-21"); // Date in IST
   const [email, setEmail] = useState("");
   const [room, setRoom] = useState("");
 
@@ -35,7 +35,7 @@ const Lobby = ({setIsDoctor, isDoctor}) => {
   const handleJoinRoom = useCallback(
     (data) => {
       const { room } = data;
-      navigate(`/room5/${room}`);
+      navigate(`/room4/${room}`);
     },
     [navigate]
   );

@@ -64,55 +64,68 @@ const Room4 = ({ isDoctor }) => {
       console.error("No stream available to toggle the camera");
       return;
     }
-  
+
     const videoTrack = myStream.getVideoTracks()[0];
     let newStream;
-  
+
     if (videoTrack && videoTrack.enabled) {
       // Camera is on, replace with a stream without video
-      newStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+      newStream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true,
+      });
       const newVideoTrack = newStream.getVideoTracks()[0];
-      
+
       // Replace the video track with no video
-      const sender = peerConnection.getSenders().find(sender => sender.track?.kind === 'video');
+      const sender = peerConnection
+        .getSenders()
+        .find((sender) => sender.track?.kind === "video");
       if (sender) {
-        sender.replaceTrack(newVideoTrack);  // Will replace with no video track
+        sender.replaceTrack(newVideoTrack); // Will replace with no video track
       }
       console.log("Camera turned off");
     } else {
       // Camera is off, replace with a stream with video
-      newStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      newStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
       const newVideoTrack = newStream.getVideoTracks()[0];
-      
+
       // Replace the video track with a video track
-      const sender = peerConnection.getSenders().find(sender => sender.track?.kind === 'video');
+      const sender = peerConnection
+        .getSenders()
+        .find((sender) => sender.track?.kind === "video");
       if (sender) {
-        sender.replaceTrack(newVideoTrack);  // Will replace with a video track
+        sender.replaceTrack(newVideoTrack); // Will replace with a video track
       }
       console.log("Camera turned on");
     }
   };
-  
+
   const toggleMic = async () => {
     try {
       if (isMic) {
         // myStream.getAudioTracks().forEach((track) => track.stop());
         setIsMic(false);
-        peer.peer.getSenders()
+        peer.peer
+          .getSenders()
           .filter((sender) => sender.track.kind === "audio")
           .forEach((sender) => sender.replaceTrack(null));
         console.log("Microphone turned off.");
       } else {
-        const newStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
         const newAudioTrack = newStream.getAudioTracks()[0];
         const audioSender = peer.peer
           .getSenders()
           .find((sender) => sender.track.kind === "audio");
         if (audioSender) await audioSender.replaceTrack(newAudioTrack);
-        setMyStream((prevStream) => new MediaStream([
-          ...prevStream.getVideoTracks(),
-          newAudioTrack,
-        ]));
+        setMyStream(
+          (prevStream) =>
+            new MediaStream([...prevStream.getVideoTracks(), newAudioTrack])
+        );
         setIsMic(true);
         console.log("Microphone turned on.");
       }
@@ -125,7 +138,7 @@ const Room4 = ({ isDoctor }) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
   }, []);
-
+  
   const handleCallUser = useCallback(async () => {
     try {
       const offer = await peer.getOffer();
@@ -422,16 +435,11 @@ const Room4 = ({ isDoctor }) => {
               className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
               onClick={toggleCamera}
             >
-              {
-              isCamera ? <img
-                src={video__controls}
-                alt=""
-              />:
-              <img
-                src={not__video__controls}
-                alt=""
-              />
-              }
+              {isCamera ? (
+                <img src={video__controls} alt="" />
+              ) : (
+                <img src={not__video__controls} alt="" />
+              )}
             </div>
             <div
               className="rounded-[22px] w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
@@ -443,16 +451,11 @@ const Room4 = ({ isDoctor }) => {
               className="bg-white rounded-full text-black w-[7%] h-[75%] p-3 flex justify-center items-center cursor-pointer"
               onClick={toggleMic}
             >
-              {isMic ? 
-              <img
-              src={mic__controls}
-              alt=""
-            />:
-            <img
-                src={not__mic__controls}
-                alt=""
-              />
-            }
+              {isMic ? (
+                <img src={mic__controls} alt="" />
+              ) : (
+                <img src={not__mic__controls} alt="" />
+              )}
             </div>
           </div>
         </div>
